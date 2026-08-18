@@ -50,6 +50,7 @@
             justify-content: center;
             align-items: center;
             z-index: 999999;
+            transition: opacity 0.4s ease;
         }
 
         a { text-decoration: none; }
@@ -335,6 +336,30 @@
 
         .solution-output-box.active { display: block; }
 
+        /* FLOATING WHATSAPP BUTTON */
+        .whatsapp-float {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background-color: #25d366;
+            color: white;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 9999;
+            transition: all 0.3s ease;
+        }
+
+        .whatsapp-float:hover {
+            transform: scale(1.1);
+            color: white;
+        }
+
         footer {
             background: var(--dark-bg);
             color: white;
@@ -348,6 +373,14 @@
     </style>
 </head>
 <body>
+
+    <!-- FLOATING WHATSAPP SUPPORT BUTTON -->
+    <a href="https://wa.me/919876543210?text=Hello%20RepairOS%20Team,%20I%20have%20a%20query!" 
+       target="_blank" 
+       class="whatsapp-float" 
+       title="Chat with Support">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
 
     <!-- INITIAL LOADING OVERLAY -->
     <div id="appLoadingOverlay">
@@ -469,8 +502,9 @@
                     </div>
                 </div>
 
-                <div class="content-card" style="max-width: 900px;">
-                    <h3 class="fw-bold mb-3 text-center"><i class="fa-solid fa-sliders text-success me-2"></i>Interactive Problem Finder & Cost Estimator</h3>
+                <!-- DIAGNOSTIC ESTIMATOR -->
+                <div class="content-card mb-4" style="max-width: 900px;">
+                    <h3 class="fw-bold mb-3 text-center"><i class="fa-solid fa-sliders text-success me-2"></i>Interactive Problem Finder</h3>
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">1. Select Category</label>
@@ -496,6 +530,43 @@
                         <span id="solTag" class="badge bg-primary text-white">-</span>
                     </div>
                 </div>
+
+                <!-- REPAIR COST CALCULATOR -->
+                <div class="content-card" style="max-width: 900px;">
+                    <h3 class="fw-bold mb-3 text-center"><i class="fa-solid fa-calculator text-primary me-2"></i>Instant Repair Cost Estimator</h3>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Device Type</label>
+                            <select id="estDevice" class="form-select" onchange="calculateEstimate()">
+                                <option value="0">-- Select Device --</option>
+                                <option value="500">Smartphone</option>
+                                <option value="1000">Laptop / PC</option>
+                                <option value="800">Tablet / iPad</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Repair Service</label>
+                            <select id="estRepair" class="form-select" onchange="calculateEstimate()">
+                                <option value="0">-- Select Service --</option>
+                                <option value="1500">Screen Replacement</option>
+                                <option value="800">Battery Replacement</option>
+                                <option value="1200">Motherboard Issue</option>
+                                <option value="400">Software Flash / Clean</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Express Service (+ ₹300)</label>
+                            <div class="form-check form-switch mt-2">
+                                <input class="form-check-input" type="checkbox" id="expressCheck" onchange="calculateEstimate()">
+                                <label class="form-check-label fw-semibold" for="expressCheck">Same Day Delivery</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="estimateResult" class="alert alert-info mt-3 text-center d-none">
+                        <h4 class="fw-bold mb-1">Estimated Total: <span id="estTotalAmount" class="text-success">₹0</span></h4>
+                        <small class="text-muted">*Includes spare parts, labor charges & GST.</small>
+                    </div>
+                </div>
             </section>
 
             <!-- 2. BOOK REPAIR SECTION -->
@@ -504,10 +575,14 @@
                     <h2 class="fw-bold text-center mb-2">Book a Repair</h2>
                     <p class="text-muted text-center mb-4">Your order will be securely saved into the system database.</p>
 
-                    <form onsubmit="handleBooking(event)">
+                    <form id="repairBookingForm" onsubmit="handleBooking(event)">
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Full Name</label>
                             <input type="text" id="bookName" class="form-control" placeholder="Your Name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Mobile Number (WhatsApp)</label>
+                            <input type="tel" id="bookPhone" class="form-control" placeholder="10 Digit Phone Number" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Device Model</label>
@@ -520,7 +595,12 @@
                         
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Upload Photo / Take Picture (Camera)</label>
-                            <input type="file" id="bookFile" class="form-control" accept="image/*" capture="environment">
+                            <input type="file" id="bookFile" class="form-control" accept="image/*" capture="environment" onchange="handleFileSelect(event)">
+                            <div id="filePreviewBox" class="mt-2 d-none">
+                                <small class="text-success fw-bold d-block mb-1"><i class="fa-solid fa-paperclip me-1"></i> File Attached:</small>
+                                <img id="previewImg" src="" alt="Preview" style="max-height: 120px; border-radius: 8px; border: 1px solid #cbd5e1; display: none;">
+                                <p id="previewFileName" class="small text-muted mb-0"></p>
+                            </div>
                         </div>
 
                         <button type="submit" class="btn-primary-custom w-100">Save Booking</button>
@@ -541,13 +621,14 @@
                                     <th>Customer Name</th>
                                     <th>Device</th>
                                     <th>Issue Details</th>
+                                    <th>Attachment</th>
                                     <th>Status</th>
                                     <th>Quick Action</th>
                                 </tr>
                             </thead>
                             <tbody id="bookingsTableBody">
                                 <tr>
-                                    <td colspan="5" class="text-center text-muted">Loading live records...</td>
+                                    <td colspan="6" class="text-center text-muted">Loading live records...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -599,7 +680,7 @@
                                 <div id="step4"><i class="fa-solid fa-circle fa-sm d-block mb-1"></i>Ready</div>
                             </div>
                             <div class="progress mt-3 mb-3" style="height: 6px;">
-                                <div id="progressBar" class="progress-bar bg-success" style="width: 75%;"></div>
+                                <div id="progressBar" class="progress-bar bg-success" style="width: 25%;"></div>
                             </div>
                             <p id="trackStatusText" class="text-center mb-0 text-dark fw-medium small"></p>
                         </div>
@@ -662,7 +743,7 @@
                 </div>
             </section>
 
-            <!-- 8. ABOUT US SECTION (Advanced Project Details & Developer Profile) -->
+            <!-- 8. ABOUT US SECTION -->
             <section id="aboutSection" class="page-section">
                 <div class="content-card" style="max-width: 950px;">
                     <h2 class="fw-bold mb-3"><i class="fa-solid fa-microchip text-success me-2"></i>About RepairOS & Technical Architecture</h2>
@@ -670,7 +751,6 @@
                         RepairOS is an enterprise-grade AI-powered device repair portal built to automate diagnostic evaluations, track live ticket workflows, and streamline customer management.
                     </p>
 
-                    <!-- DEVELOPER & TECHNICAL SPECIFICATION MATRIX -->
                     <div class="row g-4 mb-4">
                         <div class="col-md-6">
                             <div class="p-4 border rounded-4 bg-light h-100 border-success">
@@ -692,49 +772,22 @@
                             </div>
                         </div>
                     </div>
-
-                    <h4 class="fw-bold mb-3 text-dark">🚀 Advanced AI & Database Integration Features</h4>
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <div class="p-3 border rounded-3 bg-white h-100 shadow-sm">
-                                <h6 class="fw-bold text-success mb-2"><i class="fa-solid fa-brain me-2"></i>AI Neural Engine</h6>
-                                <p class="text-muted small mb-0">Trained classification matrix parsing customer symptom patterns and predicting optimal electronic part replacements.</p>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="p-3 border rounded-3 bg-white h-100 shadow-sm">
-                                <h6 class="fw-bold text-primary mb-2"><i class="fa-solid fa-server me-2"></i>Real-Time Sync</h6>
-                                <p class="text-muted small mb-0">Instant persistence layer capturing booking states and propagating updates instantly to the admin dashboard.</p>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="p-3 border rounded-3 bg-white h-100 shadow-sm">
-                                <h6 class="fw-bold text-danger mb-2"><i class="fa-solid fa-shield-halved me-2"></i>Secure Encryption</h6>
-                                <p class="text-muted small mb-0">End-to-end token validation protecting database transactions and sensitive user parameters.</p>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </section>
 
             <!-- 9. CONTACT SECTION -->
             <section id="contactSection" class="page-section">
                 <div class="content-card" style="max-width: 600px;">
-                    <h2 class="fw-bold text-center mb-2">Get in Touch</h2>
-                    <p class="text-muted text-center mb-4">Send us a message for support or call us at <strong class="text-dark">+91 13333 13333</strong>.</p>
-
-                    <form onsubmit="event.preventDefault(); alert('Message sent successfully!'); showSection('homeSection');">
+                    <h2 class="fw-bold text-center mb-2">Contact Support</h2>
+                    <p class="text-muted text-center mb-4">Have questions? Reach out to our technical team.</p>
+                    <form onsubmit="event.preventDefault(); alert('Message submitted successfully!');">
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Your Name</label>
-                            <input type="text" class="form-control" placeholder="Name" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Email Address</label>
-                            <input type="email" class="form-control" placeholder="Email" required>
+                            <label class="form-label fw-semibold">Subject</label>
+                            <input type="text" class="form-control" placeholder="Inquiry topic" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Message</label>
-                            <textarea class="form-control" rows="4" placeholder="Type message..." required></textarea>
+                            <textarea class="form-control" rows="4" placeholder="How can we help you?" required></textarea>
                         </div>
                         <button type="submit" class="btn-primary-custom w-100">Send Message</button>
                     </form>
@@ -747,39 +800,96 @@
                     <h2 class="fw-bold mb-4">Account Settings</h2>
                     <div class="form-check form-switch mb-3">
                         <input class="form-check-input" type="checkbox" id="emailNotif" checked>
-                        <label class="form-check-label fw-medium" for="emailNotif">Email Notifications on Status Updates</label>
+                        <label class="form-check-label fw-semibold" for="emailNotif">Email Notifications on Repair Status Updates</label>
                     </div>
-                    <div class="form-check form-switch mb-3">
+                    <div class="form-check form-switch mb-4">
                         <input class="form-check-input" type="checkbox" id="smsNotif" checked>
-                        <label class="form-check-label fw-medium" for="smsNotif">SMS Order Alerts (+91 13333 13333)</label>
+                        <label class="form-check-label fw-semibold" for="smsNotif">WhatsApp Automated Alerts</label>
                     </div>
+                    <button class="btn-primary-custom" onclick="alert('Settings saved!')">Save Preferences</button>
                 </div>
             </section>
 
-            <!-- 11. ADMIN SECTION -->
+            <!-- 11. ADVANCED ADMIN PANEL SECTION -->
             <section id="adminSection" class="page-section">
-                <div class="content-card" style="max-width: 900px;">
-                    <h2 class="fw-bold mb-2"><i class="fa-solid fa-user-shield text-danger me-2"></i>Admin Dashboard</h2>
-                    <p class="text-muted mb-4">Manage customer repair orders and update statuses.</p>
+                <div class="content-card">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="fw-bold m-0"><i class="fa-solid fa-user-shield text-primary me-2"></i>Admin Dashboard</h2>
+                        <button class="btn btn-sm btn-outline-success fw-semibold" onclick="exportToCSV()">
+                            <i class="fa-solid fa-file-excel me-1"></i> Export Excel (CSV)
+                        </button>
+                    </div>
+                    
+                    <!-- COUNTER CARDS -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-3">
+                            <div class="p-3 bg-light rounded-3 border text-center">
+                                <h3 class="fw-bold text-success m-0" id="adminTotalJobs">3</h3>
+                                <small class="text-muted">Total Repair Tickets</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3 bg-light rounded-3 border text-center">
+                                <h3 class="fw-bold text-warning m-0" id="adminPendingJobs">2</h3>
+                                <small class="text-muted">In Progress / Pending</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3 bg-light rounded-3 border text-center">
+                                <h3 class="fw-bold text-primary m-0" id="adminCompletedJobs">1</h3>
+                                <small class="text-muted">Completed (Ready)</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3 bg-light rounded-3 border text-center">
+                                <h3 class="fw-bold text-dark m-0">99.8%</h3>
+                                <small class="text-muted">System Uptime</small>
+                            </div>
+                        </div>
+                    </div>
 
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Customer</th>
-                                    <th>Device</th>
-                                    <th>Issue</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="adminTableBody">
-                                <tr>
-                                    <td colspan="6" class="text-center text-muted">Loading admin records...</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <!-- SEARCH & FILTER TOOLBAR -->
+                    <div class="mt-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold m-0"><i class="fa-solid fa-list-check me-2"></i>All Repair Orders Management</h5>
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-8">
+                                <input type="text" id="adminSearchInput" class="form-control" placeholder="Search by Ticket ID, Customer Name, or Device..." onkeyup="filterAdminTable()">
+                            </div>
+                            <div class="col-md-4">
+                                <select id="adminStatusFilter" class="form-select" onchange="filterAdminTable()">
+                                    <option value="ALL">All Statuses</option>
+                                    <option value="Placed">Placed</option>
+                                    <option value="Diagnosis">Diagnosis</option>
+                                    <option value="In Progress">In Progress</option>
+                                    <option value="Ready">Ready</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- ADMIN ORDERS TABLE -->
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped align-middle">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Ticket ID</th>
+                                        <th>Customer</th>
+                                        <th>Device</th>
+                                        <th>Issue</th>
+                                        <th>Attachment</th>
+                                        <th>Live Status Control</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="adminBookingsTableBody">
+                                    <tr>
+                                        <td colspan="7" class="text-center text-muted">No repair tickets found.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -787,63 +897,66 @@
         </div>
     </main>
 
-    <!-- FOOTER WITH SPECIFIED DETAILS -->
+    <!-- FOOTER -->
     <footer>
         <div class="container-custom">
-            <p class="mb-1">Developed by <span class="dev-credit">Ishwari Prabodhan Pawar</span> &bull; Domain: <span class="text-white">AI</span> &bull; College: <span class="text-white">K.B.P. Polytechnic, Satara</span></p>
-            <p class="mb-2">Program: In-Plant Training 2026 &bull; Helpline: <span class="text-warning fw-bold">+91 13333 13333</span></p>
-            <p class="text-muted small m-0">&copy; 2026 RepairOS Portal. All rights reserved.</p>
+            <p class="m-0">&copy; 2026 RepairOS Portal. Designed & Developed by <span class="dev-credit">Ishwari Prabodhan Pawar</span></p>
         </div>
     </footer>
 
-    <!-- JAVASCRIPT LOGIC -->
+    <!-- JAVASCRIPT APP LOGIC -->
     <script>
-        // Mock State Management
-        let currentUser = null;
-
-        // Diagnostic Data Map
+        // Diagnostic Data
         const diagnosticData = {
             hardware: {
-                screen: {
-                    title: "Broken / Cracked Display",
-                    cause: "Physical impact or pressure causing OLED/LCD panel fracture.",
-                    fix: "Complete display assembly replacement.",
-                    cost: "$120 - $250 (Estimated Time: 2 Hours)",
-                    tag: "Hardware Repair"
+                "Screen Cracked / Black Display": {
+                    cause: "Physical damage to digitizer or ribbon cable.",
+                    fix: "Replace display panel & flex ribbon.",
+                    cost: "₹2,500 - ₹6,500",
+                    tag: "Hardware Service"
                 },
-                battery: {
-                    title: "Fast Draining / Dead Battery",
-                    cause: "Chemical aging or degraded lithium-ion cell capacity.",
-                    fix: "Battery cell replacement with OEM standard unit.",
-                    cost: "$60 - $90 (Estimated Time: 45 Mins)",
-                    tag: "Power Repair"
+                "Battery Draining Rapidly": {
+                    cause: "High charge cycle degradation.",
+                    fix: "Replace with high-capacity OEM battery.",
+                    cost: "₹1,200 - ₹2,800",
+                    tag: "Battery Replacement"
                 }
             },
             software: {
-                bootloop: {
-                    title: "Device Stuck on Logo / Bootloop",
-                    cause: "Corrupted OS partition or failed system update.",
-                    fix: "Firmware reinstallation / Safe mode recovery.",
-                    cost: "$40 - $70 (Estimated Time: 1 Hour)",
-                    tag: "Software Recovery"
+                "Stuck on Boot Loop": {
+                    cause: "Corrupted OS system partition.",
+                    fix: "Perform clean OS restore & flash firmware.",
+                    cost: "₹500 - ₹1,200",
+                    tag: "Software Flash"
                 }
             }
         };
 
-        // Initialize App
-        window.addEventListener('DOMContentLoaded', () => {
+        // Mock Database State
+        let mockBookings = [
+            { id: "REP-101", name: "Alex Johnson", phone: "9876543210", device: "iPhone 13 Pro", issue: "Screen cracked", attachment: "screen.jpg", attachmentUrl: "", status: "In Progress" },
+            { id: "REP-102", name: "Rohan Patil", phone: "9123456789", device: "MacBook Air M1", issue: "Battery replacement", attachment: "battery.png", attachmentUrl: "", status: "Diagnosis" },
+            { id: "REP-103", name: "Siddharth Rao", phone: "9988776655", device: "Dell XPS 15", issue: "Overheating issue", attachment: "No File Attached", attachmentUrl: "", status: "Placed" }
+        ];
+
+        let currentUser = null;
+        let selectedFileBase64 = "";
+        let selectedFileName = "";
+
+        // DOM Load Initializer
+        document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
-                document.getElementById('appLoadingOverlay').style.display = 'none';
+                document.getElementById('appLoadingOverlay').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('appLoadingOverlay').style.display = 'none';
+                }, 400);
             }, 600);
+
+            renderBookingsTable();
+            renderAdminTable();
         });
 
-        // Toggle Sidebar Navigation
-        function toggleSidebar() {
-            document.getElementById('sidebarMenu').classList.toggle('active');
-            document.getElementById('sidebarOverlay').classList.toggle('active');
-        }
-
-        // Toggle Authentication Forms
+        // Auth Systems
         function toggleAuthForms(type) {
             if (type === 'register') {
                 document.getElementById('loginCardInline').classList.add('d-none');
@@ -854,119 +967,438 @@
             }
         }
 
-        // Login Handler
         function loginUser(e) {
             e.preventDefault();
             const email = document.getElementById('loginEmail').value;
             currentUser = { email: email, name: email.split('@')[0] };
             
-            // Update UI State
             document.getElementById('authGateContainer').classList.add('d-none');
-            document.getElementById('mainHeader').classList.remove('d-none');
             document.getElementById('protectedPortal').classList.remove('d-none');
+            document.getElementById('mainHeader').classList.remove('d-none');
             
-            // Update Profile Info
-            document.getElementById('profileName').innerText = currentUser.name;
             document.getElementById('profileEmail').innerText = currentUser.email;
             document.getElementById('profileEmailInput').value = currentUser.email;
+            document.getElementById('profileName').innerText = currentUser.name;
             document.getElementById('profileAvatar').innerText = currentUser.name.charAt(0).toUpperCase();
 
             showSection('homeSection');
         }
 
-        // Register Handler
         function registerUser(e) {
             e.preventDefault();
-            alert('Account created successfully! Please login.');
-            toggleAuthForms('login');
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            currentUser = { email: email, name: name };
+
+            document.getElementById('authGateContainer').classList.add('d-none');
+            document.getElementById('protectedPortal').classList.remove('d-none');
+            document.getElementById('mainHeader').classList.remove('d-none');
+
+            document.getElementById('profileEmail').innerText = currentUser.email;
+            document.getElementById('profileEmailInput').value = currentUser.email;
+            document.getElementById('profileName').innerText = currentUser.name;
+            document.getElementById('profileAvatar').innerText = currentUser.name.charAt(0).toUpperCase();
+
+            showSection('homeSection');
         }
 
-        // Logout Handler
         function logoutUser() {
             currentUser = null;
-            document.getElementById('mainHeader').classList.add('d-none');
             document.getElementById('protectedPortal').classList.add('d-none');
+            document.getElementById('mainHeader').classList.add('d-none');
             document.getElementById('authGateContainer').classList.remove('d-none');
-            document.getElementById('loginEmail').value = '';
-            document.getElementById('loginPassword').value = '';
+            toggleAuthForms('login');
+            closeSidebar();
         }
 
-        // Switch Sections
+        // Navigation Router
         function showSection(sectionId) {
-            document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active-section'));
-            document.getElementById(sectionId).classList.add('active-section');
+            const sections = document.querySelectorAll('.page-section');
+            sections.forEach(sec => sec.classList.remove('active-section'));
+
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) targetSection.classList.add('active-section');
+
+            const links = document.querySelectorAll('.sidebar-links a');
+            links.forEach(link => link.classList.remove('active-link'));
             
-            // Update Sidebar Active Link
-            document.querySelectorAll('.sidebar-links a').forEach(a => a.classList.remove('active-link'));
             const activeLink = document.getElementById('link-' + sectionId);
             if (activeLink) activeLink.classList.add('active-link');
 
-            // Close sidebar if open
+            closeSidebar();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebarMenu').classList.toggle('active');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
+
+        function closeSidebar() {
             document.getElementById('sidebarMenu').classList.remove('active');
             document.getElementById('sidebarOverlay').classList.remove('active');
-            window.scrollTo(0, 0);
         }
 
-        // Update Sub-Issues dynamically
+        // Diagnostics
         function updateSubIssues() {
             const category = document.getElementById('issueCategory').value;
-            const subSelect = document.getElementById('specificIssue');
-            subSelect.innerHTML = '<option value="">-- Choose Symptom --</option>';
+            const issueSelect = document.getElementById('specificIssue');
+            const solutionBox = document.getElementById('solutionBox');
+
+            issueSelect.innerHTML = '<option value="">-- Choose Symptom --</option>';
+            solutionBox.classList.remove('active');
 
             if (category && diagnosticData[category]) {
-                for (let key in diagnosticData[category]) {
+                Object.keys(diagnosticData[category]).forEach(symptom => {
                     const opt = document.createElement('option');
-                    opt.value = key;
-                    opt.innerText = diagnosticData[category][key].title;
-                    subSelect.appendChild(opt);
-                }
+                    opt.value = symptom;
+                    opt.textContent = symptom;
+                    issueSelect.appendChild(opt);
+                });
             }
-            document.getElementById('solutionBox').classList.remove('active');
         }
 
-        // Display Solution Box
         function displaySolution() {
             const category = document.getElementById('issueCategory').value;
             const symptom = document.getElementById('specificIssue').value;
-            const box = document.getElementById('solutionBox');
+            const solutionBox = document.getElementById('solutionBox');
 
             if (category && symptom && diagnosticData[category][symptom]) {
                 const data = diagnosticData[category][symptom];
-                document.getElementById('solTitle').innerHTML = `<i class="fa-solid fa-circle-check me-2"></i> ${data.title}`;
                 document.getElementById('solCause').querySelector('span').innerText = data.cause;
                 document.getElementById('solFix').querySelector('span').innerText = data.fix;
                 document.getElementById('solCost').querySelector('span').innerText = data.cost;
                 document.getElementById('solTag').innerText = data.tag;
-                box.classList.add('active');
+                solutionBox.classList.add('active');
             } else {
-                box.classList.remove('active');
+                solutionBox.classList.remove('active');
             }
         }
 
-        // Handle Booking Form
-        function handleBooking(e) {
-            e.preventDefault();
-            alert('Repair booking saved successfully!');
-            e.target.reset();
-            showSection('homeSection');
+        // Cost Calculator Function
+        function calculateEstimate() {
+            const baseDevice = parseInt(document.getElementById('estDevice').value) || 0;
+            const repairCost = parseInt(document.getElementById('estRepair').value) || 0;
+            const isExpress = document.getElementById('expressCheck').checked;
+
+            if (baseDevice === 0 || repairCost === 0) {
+                document.getElementById('estimateResult').classList.add('d-none');
+                return;
+            }
+
+            let total = baseDevice + repairCost;
+            if (isExpress) total += 300;
+
+            document.getElementById('estTotalAmount').innerText = `₹${total}`;
+            document.getElementById('estimateResult').classList.remove('d-none');
         }
 
-        // AI Diagnosis Simulator
+        // AI Diagnosis
         function runAIDiagnosis(e) {
             e.preventDefault();
-            const text = document.getElementById('aiProblemInput').value;
-            const resultBox = document.getElementById('aiResultBox');
-            const resultText = document.getElementById('aiResultText');
+            const input = document.getElementById('aiProblemInput').value.toLowerCase();
+            const box = document.getElementById('aiResultBox');
+            const text = document.getElementById('aiResultText');
 
-            resultText.innerText = `Analyzing symptom: "${text}". AI recommends a hardware inspection and firmware integrity check. Estimated turnaround time is 24 hours.`;
-            resultBox.classList.remove('d-none');
+            box.classList.remove('d-none');
+            text.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i> Analyzing diagnostic signatures...';
+
+            setTimeout(() => {
+                if (input.includes('screen') || input.includes('display')) {
+                    text.innerHTML = '<strong>Confidence: 94%</strong> - Display module damage. Recommended: OLED/LCD replacement.';
+                } else if (input.includes('battery') || input.includes('charge')) {
+                    text.innerHTML = '<strong>Confidence: 89%</strong> - Power supply anomaly. Recommended: Battery replacement.';
+                } else {
+                    text.innerHTML = '<strong>Confidence: 78%</strong> - Software crash. Recommended: Cache reset / OS flash.';
+                }
+            }, 800);
         }
 
-        // Track Repair Status
+        // Tracking
         function trackStatus(e) {
             e.preventDefault();
-            document.getElementById('trackResultContainer').classList.remove('d-none');
-            document.getElementById('trackStatusText').innerText = "Status: Device currently undergoing hardware diagnostic testing.";
+            const trackId = document.getElementById('trackId').value.trim().toUpperCase();
+            const container = document.getElementById('trackResultContainer');
+            const statusText = document.getElementById('trackStatusText');
+            const progressBar = document.getElementById('progressBar');
+
+            container.classList.remove('d-none');
+            const match = mockBookings.find(b => b.id === trackId);
+
+            if (match) {
+                if (match.status === 'Placed') {
+                    progressBar.style.width = '25%';
+                    statusText.innerText = `Ticket ${match.id} (${match.device}): Received & Registered.`;
+                } else if (match.status === 'Diagnosis') {
+                    progressBar.style.width = '50%';
+                    statusText.innerText = `Ticket ${match.id} (${match.device}): Technician diagnosing issue.`;
+                } else if (match.status === 'In Progress') {
+                    progressBar.style.width = '75%';
+                    statusText.innerText = `Ticket ${match.id} (${match.device}): Repair work in progress.`;
+                } else {
+                    progressBar.style.width = '100%';
+                    statusText.innerText = `Ticket ${match.id} (${match.device}): Repair complete! Ready for pickup.`;
+                }
+            } else {
+                progressBar.style.width = '10%';
+                statusText.innerText = `Repair ID ${trackId} not found in database.`;
+            }
+        }
+
+        // Attachments
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            const previewBox = document.getElementById('filePreviewBox');
+            const previewImg = document.getElementById('previewImg');
+            const previewFileName = document.getElementById('previewFileName');
+
+            if (file) {
+                selectedFileName = file.name;
+                previewBox.classList.remove('d-none');
+                previewFileName.innerText = file.name;
+
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    selectedFileBase64 = event.target.result;
+                    if (file.type.startsWith('image/')) {
+                        previewImg.src = event.target.result;
+                        previewImg.style.display = 'block';
+                    } else {
+                        previewImg.style.display = 'none';
+                    }
+                };
+                reader.readAsDataURL(file);
+            } else {
+                selectedFileBase64 = "";
+                selectedFileName = "";
+                previewBox.classList.add('d-none');
+            }
+        }
+
+        // Booking Logic
+        function handleBooking(e) {
+            e.preventDefault();
+            const name = document.getElementById('bookName').value;
+            const phone = document.getElementById('bookPhone').value;
+            const device = document.getElementById('bookDevice').value;
+            const issue = document.getElementById('bookIssue').value;
+
+            const newId = 'REP-' + (100 + mockBookings.length + 1);
+            
+            mockBookings.push({
+                id: newId,
+                name: name,
+                phone: phone,
+                device: device,
+                issue: issue,
+                attachment: selectedFileName || 'No File Attached',
+                attachmentUrl: selectedFileBase64,
+                status: 'Placed'
+            });
+
+            renderBookingsTable();
+            renderAdminTable();
+
+            alert(`Booking successful! Ticket ID: ${newId}`);
+            
+            document.getElementById('repairBookingForm').reset();
+            selectedFileBase64 = "";
+            selectedFileName = "";
+            document.getElementById('filePreviewBox').classList.add('d-none');
+
+            showSection('bookingsSection');
+        }
+
+        function renderBookingsTable() {
+            const tbody = document.getElementById('bookingsTableBody');
+            if (!tbody) return;
+
+            tbody.innerHTML = '';
+            mockBookings.forEach(item => {
+                const tr = document.createElement('tr');
+                let attachHtml = `<span class="text-muted small">${item.attachment}</span>`;
+                if (item.attachmentUrl) {
+                    attachHtml = `<a href="${item.attachmentUrl}" target="_blank" class="btn btn-sm btn-outline-success"><i class="fa-solid fa-image me-1"></i> View</a>`;
+                }
+
+                tr.innerHTML = `
+                    <td><strong>${item.name}</strong><br><small class="text-muted">${item.id}</small></td>
+                    <td>${item.device}</td>
+                    <td>${item.issue}</td>
+                    <td>${attachHtml}</td>
+                    <td><span class="badge ${item.status === 'In Progress' ? 'bg-warning text-dark' : (item.status === 'Diagnosis' ? 'bg-info text-dark' : (item.status === 'Ready' ? 'bg-success' : 'bg-secondary'))}">${item.status}</span></td>
+                    <td><button class="btn btn-sm btn-outline-primary" onclick="quickTrack('${item.id}')">Track</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // WhatsApp Direct Notification
+        function sendWhatsAppNotification(id) {
+            const item = mockBookings.find(b => b.id === id);
+            if (!item) return;
+
+            const phone = item.phone ? item.phone.replace(/[^0-9]/g, '') : "919876543210";
+            const formattedPhone = phone.length === 10 ? '91' + phone : phone;
+
+            const message = `Hi ${item.name}! %0A%0AUpdate regarding your RepairOS Order:%0A📌 *Ticket ID:* ${item.id}%0A📱 *Device:* ${item.device}%0A⚙️ *Status:* ${item.status}%0A%0AThank you for choosing RepairOS!`;
+            
+            window.open(`https://wa.me/${formattedPhone}?text=${message}`, '_blank');
+        }
+
+        // Print Invoice
+        function printInvoice(id) {
+            const item = mockBookings.find(b => b.id === id);
+            if (!item) return;
+
+            const printWindow = window.open('', '_blank', 'width=650,height=650');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Repair Receipt - ${item.id}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; line-height: 1.6; }
+                        .box { border: 2px solid #059669; padding: 20px; border-radius: 10px; }
+                        .header { text-align: center; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="box">
+                        <div class="header">
+                            <h2 style="color:#059669;margin:0;">RepairOS Receipt</h2>
+                            <p>Satara, Maharashtra | Support: support@repairos.ai</p>
+                        </div>
+                        <br>
+                        <p><strong>Receipt ID:</strong> ${item.id}</p>
+                        <p><strong>Customer:</strong> ${item.name} (${item.phone || 'N/A'})</p>
+                        <p><strong>Device:</strong> ${item.device}</p>
+                        <p><strong>Issue:</strong> ${item.issue}</p>
+                        <p><strong>Current Status:</strong> ${item.status}</p>
+                        <p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
+                    </div>
+                    <script>window.onload = function(){ window.print(); }<\/script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+        }
+
+        // Export Data to Excel CSV
+        function exportToCSV() {
+            if (mockBookings.length === 0) {
+                alert("No data to export!");
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,Ticket ID,Customer Name,Phone,Device,Issue,Status\n";
+            mockBookings.forEach(row => {
+                csvContent += `${row.id},${row.name},${row.phone || ''},${row.device},${row.issue},${row.status}\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "RepairOS_Orders_Report.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Admin Filter & Render Logic
+        function updateOrderStatus(id, newStatus) {
+            const booking = mockBookings.find(b => b.id === id);
+            if (booking) {
+                booking.status = newStatus;
+                renderBookingsTable();
+                renderAdminTable();
+                alert(`Order ${id} status changed to: ${newStatus}`);
+            }
+        }
+
+        function filterAdminTable() {
+            const searchVal = document.getElementById('adminSearchInput').value.toLowerCase();
+            const statusVal = document.getElementById('adminStatusFilter').value;
+
+            const filtered = mockBookings.filter(item => {
+                const matchesSearch = item.name.toLowerCase().includes(searchVal) || 
+                                      item.id.toLowerCase().includes(searchVal) || 
+                                      item.device.toLowerCase().includes(searchVal);
+                const matchesStatus = statusVal === 'ALL' || item.status === statusVal;
+                return matchesSearch && matchesStatus;
+            });
+
+            renderAdminTableCustom(filtered);
+        }
+
+        function renderAdminTable() {
+            filterAdminTable();
+        }
+
+        function renderAdminTableCustom(dataList) {
+            const adminTbody = document.getElementById('adminBookingsTableBody');
+            const adminTotal = document.getElementById('adminTotalJobs');
+            const adminPending = document.getElementById('adminPendingJobs');
+            const adminCompleted = document.getElementById('adminCompletedJobs');
+
+            if (adminTotal) adminTotal.innerText = mockBookings.length;
+            if (adminPending) {
+                adminPending.innerText = mockBookings.filter(b => b.status !== 'Ready' && b.status !== 'Completed').length;
+            }
+            if (adminCompleted) {
+                adminCompleted.innerText = mockBookings.filter(b => b.status === 'Ready' || b.status === 'Completed').length;
+            }
+
+            if (!adminTbody) return;
+            adminTbody.innerHTML = '';
+
+            if (dataList.length === 0) {
+                adminTbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted">No repair tickets found.</td></tr>`;
+                return;
+            }
+
+            dataList.forEach(item => {
+                const tr = document.createElement('tr');
+                let attachHtml = `<span class="text-muted small">${item.attachment}</span>`;
+                if (item.attachmentUrl) {
+                    attachHtml = `<a href="${item.attachmentUrl}" target="_blank" class="btn btn-sm btn-outline-success"><i class="fa-solid fa-image me-1"></i> View</a>`;
+                }
+
+                tr.innerHTML = `
+                    <td><strong class="text-primary">${item.id}</strong></td>
+                    <td>${item.name}</td>
+                    <td>${item.device}</td>
+                    <td>${item.issue}</td>
+                    <td>${attachHtml}</td>
+                    <td>
+                        <select class="form-select form-select-sm" onchange="updateOrderStatus('${item.id}', this.value)">
+                            <option value="Placed" ${item.status === 'Placed' ? 'selected' : ''}>Placed</option>
+                            <option value="Diagnosis" ${item.status === 'Diagnosis' ? 'selected' : ''}>Diagnosis</option>
+                            <option value="In Progress" ${item.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                            <option value="Ready" ${item.status === 'Ready' ? 'selected' : ''}>Ready</option>
+                        </select>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-success me-1" title="Send WhatsApp Update" onclick="sendWhatsAppNotification('${item.id}')"><i class="fa-brands fa-whatsapp"></i></button>
+                        <button class="btn btn-sm btn-outline-secondary me-1" title="Print Invoice" onclick="printInvoice('${item.id}')"><i class="fa-solid fa-print"></i></button>
+                        <button class="btn btn-sm btn-danger" title="Delete Order" onclick="deleteOrder('${item.id}')"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                `;
+                adminTbody.appendChild(tr);
+            });
+        }
+
+        function deleteOrder(id) {
+            if (confirm(`Delete order ${id}?`)) {
+                mockBookings = mockBookings.filter(b => b.id !== id);
+                renderBookingsTable();
+                renderAdminTable();
+            }
+        }
+
+        function quickTrack(id) {
+            document.getElementById('trackId').value = id;
+            showSection('trackRepairSection');
+            trackStatus(new Event('submit'));
         }
     </script>
     <script>
@@ -974,3 +1406,5 @@
 </script>
 </body>
 </html>
+
+
