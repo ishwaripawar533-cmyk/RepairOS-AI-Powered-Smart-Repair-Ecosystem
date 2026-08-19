@@ -338,22 +338,22 @@
 
         /* FLOATING WHATSAPP BUTTON */
         .whatsapp-float {
-            position: fixed;
-            bottom: 25px;
-            right: 25px;
-            background-color: #25d366;
-            color: white;
-            width: 55px;
-            height: 55px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            z-index: 9999;
-            transition: all 0.3s ease;
-        }
+    position: fixed;
+    bottom: 90px; /* Chatbase च्या वर जाण्यासाठी 90px केले आहे */
+    right: 25px;
+    background-color: #25d366;
+    color: white;
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    z-index: 99999;
+    transition: all 0.3s ease;
+}
 
         .whatsapp-float:hover {
             transform: scale(1.1);
@@ -375,12 +375,13 @@
 <body>
 
     <!-- FLOATING WHATSAPP SUPPORT BUTTON -->
-    <a href="https://wa.me/919876543210?text=Hello%20RepairOS%20Team,%20I%20have%20a%20query!" 
-       target="_blank" 
-       class="whatsapp-float" 
-       title="Chat with Support">
-        <i class="fa-brands fa-whatsapp"></i>
-    </a>
+    <!-- FLOATING WHATSAPP BUTTON (LEFT SIDE) -->
+<a href="https://wa.me/919876543210?text=Hello%20RepairOS%20Team,%20I%20have%20a%20query!" 
+   target="_blank" 
+   class="whatsapp-float-left" 
+   title="Chat with Support">
+    <i class="fa-brands fa-whatsapp"></i>
+</a>
 
     <!-- INITIAL LOADING OVERLAY -->
     <div id="appLoadingOverlay">
@@ -899,14 +900,15 @@
 
     <!-- FOOTER -->
    <!-- FOOTER SECTION -->
-<footer style="background: var(--dark-bg); color: white; padding: 25px 0; text-align: center; margin-top: auto;">
+<!-- WHITE FOOTER SECTION -->
+<footer style="background-color: #ffffff; color: #1e293b; padding: 25px 0; text-align: center; border-top: 1px solid #e2e8f0; margin-top: auto;">
     <div class="container-custom">
-        <p class="m-0 mb-2" style="font-size: 15px; font-weight: 500;">
+        <p class="m-0 mb-2" style="font-size: 15px; font-weight: 500; color: #1e293b;">
             &copy; 2026 RepairOS Portal. Developed by 
-            <span class="dev-credit" style="color: #34d399; font-weight: 700;">Ishwari Prabodhan Pawar</span>
+            <span class="dev-credit" style="color: #059669; font-weight: 700;">Ishwari Prabodhan Pawar</span>
         </p>
         
-        <p class="m-0 text-muted small" style="font-size: 13px; color: #94a3b8;">
+        <p class="m-0 small" style="font-size: 13px; color: #64748b;">
             <i class="fa-solid fa-microchip text-success me-1"></i> <strong>Domain:</strong> AI &nbsp;|&nbsp; 
             <i class="fa-solid fa-graduation-cap text-primary me-1"></i> <strong>College:</strong> K.B.P. Polytechnic, Satara &nbsp;|&nbsp; 
             <i class="fa-solid fa-briefcase text-warning me-1"></i> <strong>In-Plant Training:</strong> 2026
